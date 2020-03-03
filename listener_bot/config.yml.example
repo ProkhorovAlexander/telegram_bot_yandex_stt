@@ -1,0 +1,20 @@
+admin_id: 123456
+
+credentials:
+  yandex_api:
+    YANDEX_API_ID_KEY: 'YANDEX_API_ID_KEY_here'
+    YANDEX_API_SECRET_KEY: 'YANDEX_API_SECRET_KEY_here'
+  yandex_static:
+    YANDEX_STATIC_ID_KEY: 'YANDEX_STATIC_ID_KEY_here'
+    YANDEX_STATIC_SECRET_KEY: 'YANDEX_STATIC_SECRET_KEY_here'
+    REGION_NAME: 'ru-central1'
+    OBJECT_STORAGE_API_LINK: 'https://storage.yandexcloud.net'
+    BUCKET_NAME: 'voice-storage'
+  bot:
+    bot_key: 'bot_key_here'
+
+bot_config:
+  max_duration: 300
+  min_duration: 1
+
+
