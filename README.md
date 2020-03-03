@@ -1,4 +1,5 @@
-# telegram_bot_yandex_stt
+# Telegram Bot base on Yandex STT to transcribe voice messages
+
 Telegram bot, that uses Yandex STT to transcribe voice messages
 
 
