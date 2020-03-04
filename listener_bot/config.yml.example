@@ -1,4 +1,4 @@
-admin_id: 123456
+
 
 credentials:
   yandex_api:
@@ -12,6 +12,7 @@ credentials:
     BUCKET_NAME: 'voice-storage'
   bot:
     bot_key: 'bot_key_here'
+    admin_id: 123456
 
 bot_config:
   max_duration: 300

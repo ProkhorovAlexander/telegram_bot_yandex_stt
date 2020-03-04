@@ -68,12 +68,13 @@ def init_object_storage(client, bucket_name):
 
 
 def init_users():
-    logging.info('Checking admin in allowed users')
+    logging.info('Checking admin id in allowed users')
     with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'allowed.json'), 'r') as allowed_file:
         allowed = json.load(allowed_file)
+        admin_id = config['credentials']['bot']['admin_id']
 
-        if config['admin_id'] not in allowed['allowed_users']:
-            allowed['allowed_users'].append(config['admin_id'])
+        if admin_id not in allowed['allowed_users']:
+            allowed['allowed_users'].append(admin_id)
             logging.info('Admin ID not in allowed users list, adding')
 
             with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'allowed.json'), 'w') as allowed_file:
