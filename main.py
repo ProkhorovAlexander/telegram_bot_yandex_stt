@@ -1,12 +1,19 @@
 import logging
-from listener_bot.utils import check_buckets, init_users, bot, get_allowed_users_and_channels, MAX_DURATION, VoiceMessage, \
-    add_channels, allowed_presence_check, send_greeting
+import logging.handlers
+from listener_bot.utils import check_buckets, init_users, bot, get_allowed_users_and_channels, MAX_DURATION, \
+    VoiceMessage, add_channels, allowed_presence_check, send_greeting
 
 logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(levelname)s %(filename)s %(message)s',
                     handlers=[
-                        logging.FileHandler('logfile.log'),
-                        logging.StreamHandler()
-                    ])
+                        # logging.FileHandler('logfile.log'),
+                        logging.StreamHandler(),
+                        logging.handlers.TimedRotatingFileHandler('bot_log.log',
+                                                                  encoding='utf8',
+                                                                  interval=1,
+                                                                  when='W0',
+                                                                  backupCount=5)
+                             ])
 
 
 # BOT starter handler
@@ -24,7 +31,6 @@ def start_command_bot(message):
         elif message.from_user.id in allowed_users:
             add_channels(message.chat.id)
             send_greeting(message.chat.id)
-
 
     elif message.chat.id in allowed_channels:
         bot.reply_to(message, 'Я уже повинуюсь, господин')
@@ -52,7 +58,7 @@ def main():
     check_buckets()
     init_users()
 
-    bot.polling()
+    bot.polling(none_stop=True)
 
 
 if __name__ == '__main__':

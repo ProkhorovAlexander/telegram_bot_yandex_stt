@@ -13,7 +13,8 @@ import time
 with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config.yml'), 'r') as config_file:
     config = yaml.load(config_file, yaml.FullLoader)
 
-# print(config)
+# TODO отображение имен отправивших в консоль и хранение результатов под хэшэм в SQlite, чтобы при каждом сообщении
+#  не вызывалось API, а сначала искались результаты.
 
 # YANDEX API
 YANDEX_API_ID_KEY = config['credentials']['yandex_api']['YANDEX_API_ID_KEY']
@@ -251,8 +252,6 @@ class VoiceMessage:
             logging.WARNING(f'Retries exceeded')
             self.delete_from_object_storage()
             return 400
-
-
 
     def react(self):
 
