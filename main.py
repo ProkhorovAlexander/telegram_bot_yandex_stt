@@ -9,7 +9,6 @@ logging.basicConfig(level=logging.INFO,
                         logging.StreamHandler(),
                         logging.handlers.TimedRotatingFileHandler('bot_log.log',
                                                                   encoding='utf8',
-                                                                  interval=1,
                                                                   when='W0',
                                                                   backupCount=5)
                              ])
