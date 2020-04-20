@@ -6,7 +6,6 @@ from listener_bot.utils import check_buckets, init_users, bot, get_allowed_users
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(filename)s %(message)s',
                     handlers=[
-                        # logging.FileHandler('logfile.log'),
                         logging.StreamHandler(),
                         logging.handlers.TimedRotatingFileHandler('bot_log.log',
                                                                   encoding='utf8',
