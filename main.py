@@ -56,7 +56,7 @@ def main():
     check_buckets()
     init_users()
 
-    bot.polling(none_stop=True, timeout=1200, interval=2)
+    bot.polling(none_stop=True, timeout=600, interval=2)
 
 
 if __name__ == '__main__':

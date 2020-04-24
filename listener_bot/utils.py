@@ -266,27 +266,18 @@ class VoiceMessage:
         bot.send_chat_action(self.message.chat.id, 'typing')
 
         if self.duration < 30:
-
             stt_status_code = self.transcribe_short()
-
-            if stt_status_code == 200:
-                bot.edit_message_text(f'Вот что было сказанно в войсе:\n\n{self.transcribed_text}',
-                                      reply_msg.chat.id,
-                                      reply_msg.message_id)
-            else:
-                bot.edit_message_text('Сорри, я ушной или с твоим голосом что-то не так',
-                                      reply_msg.chat.id,
-                                      reply_msg.message_id)
-
-        elif self.duration >= 30:
-
+        else:
             stt_status_code = self.transcribe_long()
 
-            if stt_status_code == 200:
-                bot.edit_message_text(f'Вот что было сказанно в войсе:\n\n{self.transcribed_text}',
-                                      reply_msg.chat.id,
-                                      reply_msg.message_id)
-            else:
-                bot.edit_message_text('Сорри, я ушной или с твоим голосом что-то не так',
-                                      reply_msg.chat.id,
-                                      reply_msg.message_id)
+        if stt_status_code == 200:
+            head = 'Вот что было сказанно в войсе\n\n' if len(self.transcribed_text) > 0 else 'Не удалось разобрать :('
+            reply_text = f'{head}{self.transcribed_text}'
+
+            bot.edit_message_text(reply_text,
+                                  reply_msg.chat.id,
+                                  reply_msg.message_id)
+        else:
+            bot.edit_message_text('Сорри, я ушной или с твоим голосом что-то не так, что моя нейросетка не понимает',
+                                  reply_msg.chat.id,
+                                  reply_msg.message_id)
