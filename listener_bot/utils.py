@@ -45,6 +45,7 @@ try:
 except KeyError:
     logging.warning('Update your config.yml add - database name as in config.yml.example, using default name')
     DB_NAME = 'listener_bot_db'
+DB_NAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), DB_NAME)
 
 # INITIALIZATIONS
 

@@ -5,14 +5,15 @@ from listener_bot.utils import check_buckets, init_users, init_database, bot, ge
     MAX_DURATION, VoiceMessage, add_channels, allowed_presence_check, send_greeting
 
 # creating folder for logging if doesn't exists
-if not os.path.exists("logs/"):
-    os.makedirs("logs/")
+logfile_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'logs')
+if not os.path.exists(logfile_path):
+    os.makedirs(logfile_path)
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(filename)s %(message)s',
                     handlers=[
                         logging.StreamHandler(),
-                        logging.handlers.TimedRotatingFileHandler('logs/bot_log.log',
+                        logging.handlers.TimedRotatingFileHandler(f'{logfile_path}/bot_log.log',
                                                                   encoding='utf8',
                                                                   when='W0',
                                                                   backupCount=5)
