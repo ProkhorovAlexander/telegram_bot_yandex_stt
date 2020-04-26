@@ -10,6 +10,7 @@ from io import BytesIO
 import requests
 import time
 import sqlite3
+import __main__
 
 with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config.yml'), 'r') as config_file:
     config = yaml.load(config_file, yaml.FullLoader)
@@ -45,7 +46,7 @@ try:
 except KeyError:
     logging.warning('Update your config.yml add - database name as in config.yml.example, using default name')
     DB_NAME = 'listener_bot_db'
-DB_NAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), DB_NAME)
+DB_NAME = os.path.join(os.path.dirname(__main__.__file__), DB_NAME)
 
 # INITIALIZATIONS
 
