@@ -95,10 +95,6 @@ def init_users():
     logging.info('Admin ID check passed')
 
 
-check_buckets = functools.partial(init_object_storage, yandex_storage_client, BUCKET_NAME)
-
-
-# TODO сделать создание БД и её структуры, если раньше не было SQlite
 def init_database():
     db_connection = sqlite3.connect(f'{DB_NAME}.db')
     cursor = db_connection.cursor()
@@ -312,7 +308,6 @@ class VoiceMessage:
                 self.transcribe_short()
             else:
                 self.transcribe_long()
-
             self.add_to_db()
 
         if self.transcribed_text is not None:
