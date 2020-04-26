@@ -9,6 +9,7 @@ import logging
 from io import BytesIO
 import requests
 import time
+import sqlite3
 
 with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config.yml'), 'r') as config_file:
     config = yaml.load(config_file, yaml.FullLoader)
@@ -38,8 +39,15 @@ BOT_KEY = config['credentials']['bot']['bot_key']
 MAX_DURATION = config['bot_config']['max_duration']
 bot = telebot.TeleBot(BOT_KEY)
 
+# DB
+try:
+    DB_NAME = config['database']['name']
+except KeyError:
+    logging.warning('Update your config.yml add - database name as in config.yml.example, using default name')
+    DB_NAME = 'listener_bot_db'
 
 # INITIALIZATIONS
+
 
 def init_object_storage(client, bucket_name):
     logging.info('Initializing Yandex Object Storage')
@@ -63,6 +71,9 @@ def init_object_storage(client, bucket_name):
         except Exception as e:
             logging.error(f'Something is wrong, probably with bucket name try different one, error text:\n{e}')
             sys.exit(1)
+
+
+check_buckets = functools.partial(init_object_storage, yandex_storage_client, BUCKET_NAME)
 
 
 def init_users():
@@ -89,8 +100,12 @@ check_buckets = functools.partial(init_object_storage, yandex_storage_client, BU
 
 # TODO сделать создание БД и её структуры, если раньше не было SQlite
 def init_database():
-    # databse_name = config['database']['name']
-    pass
+    db_connection = sqlite3.connect(f'{DB_NAME}.db')
+    cursor = db_connection.cursor()
+    cursor.execute('CREATE TABLE IF NOT EXISTS records_transcribations ([record_id] text, [transcribation] text)')
+    db_connection.close()
+
+    logging.info('Database check passed')
 
 
 # BOT STUFF
@@ -142,6 +157,7 @@ class VoiceMessage:
         self.file_id = message.voice.file_id
         self.file_url = bot.get_file_url(self.file_id)
         self.transcribed_text = None
+        self.voice_id = message.json['voice']['file_unique_id']
 
     def get_file(self):
         voice_msg_request = requests.get(self.file_url)
@@ -255,30 +271,41 @@ class VoiceMessage:
                 retries += 1
 
         if retries >= retries_amount:
-            logging.WARNING(f'Retries exceeded')
+            logging.WARNING(f'Retries of transcribing long message exceeded')
             self.delete_from_object_storage()
 
     def check_db(self):
-        # TODO функция, которая будет проверять БД на предмет наличия сообщения по ID и отправлять его в ответ вместо
-        # отправки по API
+        db_connection = sqlite3.connect(f'{DB_NAME}.db')
+        cursor = db_connection.cursor()
+        db_result = cursor.execute(f'''
+                                    SELECT transcribation 
+                                    FROM records_transcribations 
+                                    WHERE record_id = '{self.voice_id}'
+                                    ''').fetchone()
+        db_connection.commit()
+        db_connection.close()
 
-        # db_result = None
-        #
-        # if db_result is not None:
-        #     self.transcribed_text = db_result
+        logging.debug(f'Checked db for {self.voice_id} found - {db_result}')
 
-        pass
+        if db_result is not None:
+            logging.info(f'Found record for {self.voice_id} in DB, sending from there - {db_result[0]}')
+            self.transcribed_text = db_result[0]
 
     def add_to_db(self):
-        # TODO функция,которая будет сохранять в БД транскрибированные сообщения
-        pass
+        db_connection = sqlite3.connect(f'{DB_NAME}.db')
+        cursor = db_connection.cursor()
+        cursor.execute('INSERT INTO records_transcribations VALUES (?,?)', [self.voice_id, self.transcribed_text])
+        db_connection.commit()
+        db_connection.close()
+        logging.info(f'Saved voice_id - {self.voice_id} with text - \'{self.transcribed_text}\' to DB')
 
     def transcribe(self):
 
         reply_msg = bot.reply_to(self.message, 'Слушаю, печатаю и повинуюсь....')
         bot.send_chat_action(self.message.chat.id, 'typing')
 
-        self.check_db()
+        if self.message.forward_from is not None:
+            self.check_db()
 
         if self.transcribed_text is None:
             if self.duration < 30:
