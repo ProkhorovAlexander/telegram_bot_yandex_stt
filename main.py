@@ -3,6 +3,10 @@ import logging.handlers
 from listener_bot.utils import check_buckets, init_users, init_database, bot, get_allowed_users_and_channels, \
     MAX_DURATION, VoiceMessage, add_channels, allowed_presence_check, send_greeting
 
+# creating folder for logging if doesn't exists
+if not os.path.exists("logs/"):
+    os.makedirs("logs/")
+
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(filename)s %(message)s',
                     handlers=[
