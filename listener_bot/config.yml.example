@@ -18,4 +18,5 @@ bot_config:
   max_duration: 300
   min_duration: 1
 
-
+database:
+  name: 'listner_bot_db'

@@ -1,7 +1,7 @@
 import logging
 import logging.handlers
-from listener_bot.utils import check_buckets, init_users, bot, get_allowed_users_and_channels, MAX_DURATION, \
-    VoiceMessage, add_channels, allowed_presence_check, send_greeting
+from listener_bot.utils import check_buckets, init_users, init_database, bot, get_allowed_users_and_channels, \
+    MAX_DURATION, VoiceMessage, add_channels, allowed_presence_check, send_greeting
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(filename)s %(message)s',
@@ -38,7 +38,7 @@ def start_command_bot(message):
 
 
 @bot.message_handler(content_types=['voice'])
-def print_funct(message):
+def voice_handler_func(message):
     allowed_users, allowed_channels = get_allowed_users_and_channels()
 
     if message.chat.id not in allowed_channels or allowed_presence_check(allowed_users, message.chat.id) is False:
@@ -55,6 +55,7 @@ def print_funct(message):
 def main():
     check_buckets()
     init_users()
+    init_database()
 
     bot.polling(none_stop=True, timeout=600, interval=2)
 

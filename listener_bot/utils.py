@@ -13,9 +13,6 @@ import time
 with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config.yml'), 'r') as config_file:
     config = yaml.load(config_file, yaml.FullLoader)
 
-# TODO отображение имен отправивших в консоль и хранение результатов под хэшэм в SQlite, чтобы при каждом сообщении
-#  не вызывалось API, а сначала искались результаты.
-
 # YANDEX API
 YANDEX_API_ID_KEY = config['credentials']['yandex_api']['YANDEX_API_ID_KEY']
 YANDEX_API_SECRET_KEY = config['credentials']['yandex_api']['YANDEX_API_SECRET_KEY']
@@ -88,6 +85,12 @@ def init_users():
 
 
 check_buckets = functools.partial(init_object_storage, yandex_storage_client, BUCKET_NAME)
+
+
+# TODO сделать создание БД и её структуры, если раньше не было SQlite
+def init_database():
+    # databse_name = config['database']['name']
+    pass
 
 
 # BOT STUFF
@@ -173,8 +176,10 @@ class VoiceMessage:
             self.transcribed_text = msg_text['result']
 
             logging.info(
-                f'Just transcribed SHORT voice message in chat:{self.message.chat.id} from user:{self.message.from_user.id}, message text: \'{self.transcribed_text}\'')
-            return transcribation_request.status_code
+                f'Just transcribed SHORT voice message in chat:{self.message.chat.id} from user:'
+                + f'{self.message.from_user.id} ({self.message.from_user.username}), '
+                + f'message text: \'{self.transcribed_text}\''
+            )
 
         else:
             req_status_code = transcribation_request.status_code
@@ -182,8 +187,6 @@ class VoiceMessage:
 
             logging.warning(
                 f'Transcribation of short message failed:\nCode:{req_status_code}\nContent:{req_status_content}')
-
-            return transcribation_request.status_code
 
     def join_long_text(self, chunks):
 
@@ -195,7 +198,9 @@ class VoiceMessage:
         self.transcribed_text = long_text.strip()
 
         logging.info(
-            f'Just transcribed LONG voice message in chat:{self.message.chat.id} from user:{self.message.from_user.id}, message text: \'{self.transcribed_text}\'')
+            f'Just transcribed LONG voice message in chat:{self.message.chat.id} from user:{self.message.from_user.id}'
+            + f' ({self.message.from_user.username}), message text: \'{self.transcribed_text}\''
+        )
 
     def transcribe_long(self):
 
@@ -224,7 +229,8 @@ class VoiceMessage:
 
         trans_req_json = json.loads(transcribation_request.content)
         logging.debug(
-            f'Uploaded and send transcribation request for long voice message, status:{transcribation_request.status_code}, id:{trans_req_json["id"]}')
+            f'Uploaded and send transcribation request for long voice message, ' +
+            f'status:{transcribation_request.status_code}, id:{trans_req_json["id"]}')
 
         retries = 0
         retries_amount = 15
@@ -243,7 +249,7 @@ class VoiceMessage:
             if results['done'] is True:
                 self.join_long_text(results['response']['chunks'])
                 self.delete_from_object_storage()
-                return 200
+
 
             else:
                 retries += 1
@@ -251,26 +257,38 @@ class VoiceMessage:
         if retries >= retries_amount:
             logging.WARNING(f'Retries exceeded')
             self.delete_from_object_storage()
-            return 400
 
-    def react(self):
+    def check_db(self):
+        # TODO функция, которая будет проверять БД на предмет наличия сообщения по ID и отправлять его в ответ вместо
+        # отправки по API
 
-        bot.send_chat_action(self.message.chat.id, 'typing')
-        time.sleep(1)
-        bot.reply_to(self.message, 'Вижу сообщение, реагирую')
-        print(self.message)
+        # db_result = None
+        #
+        # if db_result is not None:
+        #     self.transcribed_text = db_result
+
+        pass
+
+    def add_to_db(self):
+        # TODO функция,которая будет сохранять в БД транскрибированные сообщения
+        pass
 
     def transcribe(self):
 
         reply_msg = bot.reply_to(self.message, 'Слушаю, печатаю и повинуюсь....')
         bot.send_chat_action(self.message.chat.id, 'typing')
 
-        if self.duration < 30:
-            stt_status_code = self.transcribe_short()
-        else:
-            stt_status_code = self.transcribe_long()
+        self.check_db()
 
-        if stt_status_code == 200:
+        if self.transcribed_text is None:
+            if self.duration < 30:
+                self.transcribe_short()
+            else:
+                self.transcribe_long()
+
+            self.add_to_db()
+
+        if self.transcribed_text is not None:
             head = 'Вот что было сказанно в войсе\n\n' if len(self.transcribed_text) > 0 else 'Не удалось разобрать :('
             reply_text = f'{head}{self.transcribed_text}'
 
