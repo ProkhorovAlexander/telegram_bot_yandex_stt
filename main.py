@@ -1,3 +1,4 @@
+import os
 import logging
 import logging.handlers
 from listener_bot.utils import check_buckets, init_users, init_database, bot, get_allowed_users_and_channels, \
@@ -11,7 +12,7 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(filename)s %(message)s',
                     handlers=[
                         logging.StreamHandler(),
-                        logging.handlers.TimedRotatingFileHandler('bot_log.log',
+                        logging.handlers.TimedRotatingFileHandler('logs/bot_log.log',
                                                                   encoding='utf8',
                                                                   when='W0',
                                                                   backupCount=5)
