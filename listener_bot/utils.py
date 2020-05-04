@@ -263,7 +263,7 @@ class VoiceMessage:
             if results['done'] is True:
                 self.join_long_text(results['response']['chunks'])
                 self.delete_from_object_storage()
-
+                break
 
             else:
                 retries += 1
