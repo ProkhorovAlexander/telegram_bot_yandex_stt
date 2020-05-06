@@ -63,7 +63,7 @@ def main():
     init_users()
     init_database()
 
-    bot.polling(none_stop=True, timeout=600, interval=2)
+    bot.polling(none_stop=False, timeout=150, interval=2)
 
 
 if __name__ == '__main__':
