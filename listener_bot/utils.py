@@ -302,8 +302,7 @@ class VoiceMessage:
         reply_msg = bot.reply_to(self.message, 'Слушаю, печатаю и повинуюсь....')
         bot.send_chat_action(self.message.chat.id, 'typing')
 
-        if self.message.forward_from is not None:
-            self.check_db()
+        self.check_db()
 
         if self.transcribed_text is None:
             if self.duration < 30:
